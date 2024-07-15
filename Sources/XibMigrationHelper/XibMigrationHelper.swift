@@ -13,13 +13,22 @@ struct XibMigrationHelper: AsyncParsableCommand {
     @Argument(help: "Path to folder to analyze.")
     var folderPath: String = "."
 
+    @Argument(help: "Filter for specific files")
+    var fileFilter: String?
+
+    @Flag(name: .customLong("emptyNamedColorsOnly"), help: "Show only files which have a NamedColor reference but didn't uses it.")
+    var showNoColorUsagesOnly: Bool = false
+
     mutating func run() async throws {
         let folder = try Folder(path: folderPath)
 
         let xibDocuments = try xibFiles(folder: folder).map { ($0.pathString, $0.document) }
         let storyboardDocuments = try storyboardFiles(folder: folder).map { ($0.pathString, $0.document) }
         let allDocuments = (xibDocuments as [(String, InterfaceBuilderDocument & IBElement)]) + (storyboardDocuments as [(String, InterfaceBuilderDocument & IBElement)])
-        let allDocumentsWithNamedColors = allDocuments.filter { $0.1.hasNamedColors }
+        var allDocumentsWithNamedColors = allDocuments.filter { $0.1.hasNamedColors }
+        if let fileFilter {
+            allDocumentsWithNamedColors = allDocumentsWithNamedColors.filter { $0.0.lowercased().contains(fileFilter.lowercased())}
+        }
 
         try infoCollectionFor(allDocumentsWithNamedColors)
     }
@@ -43,6 +52,11 @@ struct XibMigrationHelper: AsyncParsableCommand {
         try documents.forEach { (path, document) in
             let colorUsages: String = " 🟩 " + document.namedColors.map { $0.name }.joined(separator: ", ")
 
+            let rows = try fileInfo(document)
+
+            let hasOutput = if showNoColorUsagesOnly { rows.isEmpty } else { true }
+
+            guard hasOutput else { return  }
             print(separator)
             print(path.bold)
             print(colorUsages)
@@ -54,9 +68,10 @@ struct XibMigrationHelper: AsyncParsableCommand {
 
             var table = TextTable(columns: [view, outlet, colorType, colorName])
 
-            let rows = try fileInfo(document)
-            table.addRows(values: rows)
-            print(table.render())
+            if !rows.isEmpty {
+                table.addRows(values: rows)
+                print(table.render())
+            }
 
             print("\n\n")
         }
@@ -73,7 +88,7 @@ struct XibMigrationHelper: AsyncParsableCommand {
         let allIBOutletsFromPlaceholder = document.flattened.compactMap { $0 as? Placeholder }.compactMap { $0.connections }.flatMap { $0 }.compactMap { $0.connection as? Outlet }
         let allIBOutlets = allIBOutletsFromOwner + allIBOutletsFromPlaceholder
 
-        let viewViews = document.flattened.compactMap { $0 as? AnyView} // TODO: AnyView ist schlecht, kann auch UIViewControlelr sein oder placeholder mit connections...
+        let viewViews = document.flattened.compactMap { $0 as? AnyView}
         let viewControllerViews = document.flattened.compactMap { $0 as? AnyViewController}.map { $0.viewController.rootView?.flattened.compactMap { $0 as? AnyView } }.compactMap { $0 }.flatMap { $0 }
         let views = viewViews + viewControllerViews
 
