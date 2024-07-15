@@ -1,5 +1,5 @@
 {
-  "originHash" : "d4a0d1191fd1578ce4c01b923efc734cf46b30260e1df5105b19f686e9957844",
+  "originHash" : "e4795c0dae2d61e43b84786daed05636408de524b3ba1f1e892fa85cfef20089",
   "pins" : [
     {
       "identity" : "files",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "d273b5b7025d386feef79ef6bad7de762e106eaf"
+      }
+    },
+    {
+      "identity" : "ibdecodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mfreiwald/IBDecodable",
+      "state" : {
+        "branch" : "xib-migration",
+        "revision" : "fee11ccbcbd55fa1f44e57b89162cafa3685cf9b"
       }
     },
     {
