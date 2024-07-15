@@ -1,0 +1,51 @@
+{
+  "originHash" : "d4a0d1191fd1578ce4c01b923efc734cf46b30260e1df5105b19f686e9957844",
+  "pins" : [
+    {
+      "identity" : "files",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/JohnSundell/Files",
+      "state" : {
+        "branch" : "master",
+        "revision" : "d273b5b7025d386feef79ef6bad7de762e106eaf"
+      }
+    },
+    {
+      "identity" : "rainbow",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/onevcat/Rainbow",
+      "state" : {
+        "branch" : "master",
+        "revision" : "1f057ea83b192a7e5030072a1fb79ec38200fcd6"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "branch" : "main",
+        "revision" : "6a7abc050b4504bc9a242af409f293e7454979b5"
+      }
+    },
+    {
+      "identity" : "swiftytexttable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/scottrhoyt/SwiftyTextTable",
+      "state" : {
+        "branch" : "master",
+        "revision" : "c6df6cf533d120716bff38f8ff9885e1ce2a4ac3"
+      }
+    },
+    {
+      "identity" : "swxmlhash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drmohundro/SWXMLHash.git",
+      "state" : {
+        "revision" : "a853604c9e9a83ad9954c7e3d2a565273982471f",
+        "version" : "7.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}
