@@ -49,6 +49,10 @@ extension ViewProtocol {
         add(ProgressView.self, \.progressTintColor)
         add(ProgressView.self, \.trackTintColor)
 
+        if let colors = userDefinedRuntimeAttributes?.compactMap({ $0.value as? Color }).filter({ $0.isNamedColor }) {
+            result.append(contentsOf: colors)
+        }
+
         return result
     }
 

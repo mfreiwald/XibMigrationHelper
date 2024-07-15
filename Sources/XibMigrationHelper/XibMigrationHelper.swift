@@ -57,7 +57,7 @@ struct XibMigrationHelper: AsyncParsableCommand {
             let hasOutput = if showNoColorUsagesOnly { rows.isEmpty } else { true }
 
             guard hasOutput else { return  }
-            print(separator)
+
             print(path.bold)
             print(colorUsages)
 
@@ -73,7 +73,7 @@ struct XibMigrationHelper: AsyncParsableCommand {
                 print(table.render())
             }
 
-            print("\n\n")
+            print("")
         }
     }
 
@@ -88,28 +88,34 @@ struct XibMigrationHelper: AsyncParsableCommand {
         let allIBOutletsFromPlaceholder = document.flattened.compactMap { $0 as? Placeholder }.compactMap { $0.connections }.flatMap { $0 }.compactMap { $0.connection as? Outlet }
         let allIBOutlets = allIBOutletsFromOwner + allIBOutletsFromPlaceholder
 
-        let viewViews = document.flattened.compactMap { $0 as? AnyView}
+        let viewViews = document.flattened.compactMap { $0 as? AnyView }
         let viewControllerViews = document.flattened.compactMap { $0 as? AnyViewController}.map { $0.viewController.rootView?.flattened.compactMap { $0 as? AnyView } }.compactMap { $0 }.flatMap { $0 }
-        let views = viewViews + viewControllerViews
+
+        let allViews = (viewViews + viewControllerViews).map { $0.view }
+
+        let collectionCells = allViews.compactMap { $0 as? CollectionViewCell }.map { $0.contentView as ViewProtocol }
+        let tableCells = allViews.compactMap { $0 as? TableViewCell }.map { $0.contentView as ViewProtocol }
+
+        let views = allViews + collectionCells + tableCells
 
         let namedColorsViews = views.filter { anyView in
-            anyView.view.hasNamedColor
+            anyView.hasNamedColor
         }
 
         return namedColorsViews.map {
-            let hasOutlet = $0.view.ibOutlet(allIBOutlets) != nil
+            let hasOutlet = $0.ibOutlet(allIBOutlets) != nil
 
-            var elementClass = $0.view.elementClass
+            var elementClass = $0.elementClass
             elementClass = hasOutlet ? elementClass.green : elementClass.red
 
-            let outlet = if let property = $0.view.ibOutlet(allIBOutlets) {
+            let outlet = if let property = $0.ibOutlet(allIBOutlets) {
                 "var " + property
             } else {
                 ""
             }
 
-            let colorTypes = $0.view.namedColors.compactMap { $0.namedColor }.map { "\($0.key ?? "")" }.joined(separator: ", ")
-            let colorNames = $0.view.namedColors.compactMap { $0.namedColor }.map { "\($0.name)" }.joined(separator: ", ")
+            let colorTypes = $0.namedColors.compactMap { $0.namedColor }.map { "\($0.key ?? "")" }.joined(separator: ", ")
+            let colorNames = $0.namedColors.compactMap { $0.namedColor }.map { "\($0.name)" }.joined(separator: ", ")
             return [elementClass, outlet, colorTypes, colorNames]
         }
     }
