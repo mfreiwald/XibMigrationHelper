@@ -13,10 +13,13 @@ struct XibMigrationHelper: AsyncParsableCommand {
     @Argument(help: "Path to folder to analyze.")
     var folderPath: String = "."
 
-    @Argument(help: "Filter for specific files")
+    @Option(name: [.short, .customLong("file")], help: "Filter for specific files")
     var fileFilter: String?
 
-    @Flag(name: .customLong("emptyNamedColorsOnly"), help: "Show only files which have a NamedColor reference but didn't uses it.")
+    @Flag(name: [.customShort("a"), .long], help: "Show all files at once")
+    var showAll: Bool = false
+
+    @Flag(name: [.customShort("e"), .customLong("emptys")], help: "Show only files which have a NamedColor reference but didn't uses it.")
     var showNoColorUsagesOnly: Bool = false
 
     mutating func run() async throws {
@@ -49,7 +52,8 @@ struct XibMigrationHelper: AsyncParsableCommand {
     }
 
     func infoCollectionFor(_ documents: [(path: String, (InterfaceBuilderDocument & IBElement))]) throws {
-        try documents.forEach { (path, document) in
+        try documents.enumerated().forEach { (index, value) in
+            let (path, document) = value
             let colorUsages: String = " 🟩 " + document.namedColors.map { $0.name }.joined(separator: ", ")
 
             let rows = try fileInfo(document)
@@ -58,22 +62,40 @@ struct XibMigrationHelper: AsyncParsableCommand {
 
             guard hasOutput else { return  }
 
-            print(path.bold)
-            print(colorUsages)
+            func printOutput() {
+                print(path.bold)
+                print(colorUsages)
 
-            let view = TextTableColumn(header: "View")
-            let outlet = TextTableColumn(header: "IBOutlet")
-            let colorType = TextTableColumn(header: "Color Type")
-            let colorName = TextTableColumn(header: "Color Name")
+                let view = TextTableColumn(header: "View")
+                let outlet = TextTableColumn(header: "IBOutlet")
+                let colorType = TextTableColumn(header: "Color Type")
+                let colorName = TextTableColumn(header: "Color Name")
 
-            var table = TextTable(columns: [view, outlet, colorType, colorName])
+                var table = TextTable(columns: [view, outlet, colorType, colorName])
 
-            if !rows.isEmpty {
-                table.addRows(values: rows)
-                print(table.render())
+                if !rows.isEmpty {
+                    table.addRows(values: rows)
+                    print(table.render())
+                }
+
+                print("")
             }
 
-            print("")
+            if showAll {
+                printOutput()
+            } else {
+                TerminalHelper.clear()
+                let current = index + 1
+                let total = documents.count
+                print("Progress [\(String(current).bold)/\(total)]")
+                printOutput()
+                if current == total {
+                    print("Press Enter or Space to quit.")
+                } else {
+                    print("Press Enter or Space to continue, Ctrl+C to quit.")
+                }
+                TerminalHelper.waitAndContinue()
+            }
         }
     }
 

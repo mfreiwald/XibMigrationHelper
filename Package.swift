@@ -14,7 +14,8 @@ let package = Package(
         .package(url: "https://github.com/JohnSundell/Files", branch: "master"),
         .package(url: "https://github.com/scottrhoyt/SwiftyTextTable", branch: "master"),
         .package(url: "https://github.com/onevcat/Rainbow", branch: "master"),
-        .package(url: "https://github.com/apple/swift-argument-parser", branch: "main")
+        .package(url: "https://github.com/pakLebah/ANSITerminal", branch: "master"),
+        .package(url: "https://github.com/apple/swift-argument-parser", branch: "main"),
     ],
     targets: [
         .executableTarget(
@@ -24,6 +25,7 @@ let package = Package(
                 .product(name: "Files", package: "Files"),
                 .product(name: "SwiftyTextTable", package: "SwiftyTextTable"),
                 .product(name: "Rainbow", package: "Rainbow"),
+                .product(name: "ANSITerminal", package: "ANSITerminal"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
             ]
         )
